@@ -80,6 +80,7 @@ const clientSchema = new mongoose.Schema(
       enum: ["PENDING", "ACTIVE", "BLOCKED", "SUSPENDED"],
       default: "PENDING",
     },
+    downloadCount: { type: Number, default: 0 },
     previousStatus: { type: String, default: null },
     lastActiveDate: { type: Date, default: null },
     softDelete: { type: Boolean, default: false },

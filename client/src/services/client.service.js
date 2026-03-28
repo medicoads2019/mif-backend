@@ -1078,3 +1078,20 @@ exports.hardDelete = async (clientId) => {
     body: { success: true, message: "Client permanently deleted" },
   };
 };
+
+exports.incrementDownloadCount = async (clientId) => {
+  const client = await Client.findByIdAndUpdate(
+    clientId,
+    { $inc: { downloadCount: 1 }, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!client)
+    return {
+      status: 404,
+      body: { success: false, message: "Client not found" },
+    };
+  return {
+    status: 200,
+    body: { success: true, data: { downloadCount: client.downloadCount } },
+  };
+};

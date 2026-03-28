@@ -468,6 +468,17 @@ exports.hardDelete = async (req, res) => {
   }
 };
 
+exports.incrementDownloadCount = async (req, res) => {
+  try {
+    const result = await service.incrementDownloadCount(req.params.clientId);
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
 exports.login = async (req, res) => {
   const { identifier, password } = req.body;
 

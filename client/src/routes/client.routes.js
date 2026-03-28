@@ -47,6 +47,10 @@ router.patch("/:clientId/send-email-otp", ctrl.sendEmailOtp);
 router.patch("/:clientId/verify-email-otp", ctrl.verifyEmailOtp);
 router.patch("/:clientId/soft-delete", ctrl.softDelete);
 router.patch("/:clientId/restore", ctrl.restore);
+router.patch(
+  "/:clientId/increment-download-count",
+  ctrl.incrementDownloadCount,
+);
 router.patch("/admin/unlock/:clientId", ctrl.adminUnlockClient);
 
 router.delete("/:clientId/hard-delete", ctrl.hardDelete);

@@ -39,6 +39,7 @@ const imageDownloadRouter = require("./imageDownload/src/routes/imageDownload.ro
 const restrictionRouter = require("./restrictions/src/routes/restriction.routes");
 const contactRouter = require("./contact/src/routes/contact.routes");
 const appContentRouter = require("./appContent/src/routes/appContent.routes");
+const startScreenImageRouter = require("./startScreenImage/src/routes/startScreenImage.routes");
 
 const isVercel = process.env.VERCEL === "1";
 const shouldWriteFileLogs =
@@ -194,6 +195,7 @@ app.use("/image-download", imageDownloadRouter);
 app.use("/restrictions", restrictionRouter);
 app.use("/contact-us", contactRouter);
 app.use("/app-content", appContentRouter);
+app.use("/start-screen-images", startScreenImageRouter);
 
 if (!isVercel && require.main === module) {
   app.listen(PORT, () => {
