@@ -12,6 +12,7 @@ exports.uploadSingle = upload.single("coverImage");
 
 exports.createClientFrame = async (req, res) => {
   const { clientFrameName, createdBy, uploadedBy } = req.body;
+  const coverImage = req.file || null;
   if (!clientFrameName)
     return res
       .status(400)
@@ -21,7 +22,7 @@ exports.createClientFrame = async (req, res) => {
       clientFrameName,
       createdBy,
       uploadedBy,
-      req.file || null,
+      coverImage,
     );
     return res.status(result.status).json(result.body);
   } catch (err) {

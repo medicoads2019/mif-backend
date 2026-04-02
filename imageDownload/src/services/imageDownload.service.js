@@ -162,7 +162,7 @@ async function resolveFestivalImageUrlById(festivalImageId) {
   }
 
   logger.info(
-    `resolveFestivalImageUrlById | festivalImageId=${festivalImageId} | imageUrl=${festivalImage.imageUrl}`,
+    `resolveFestivalImageUrlById | festivalImageId=${festivalImageId} | imageUrlPresent=${Boolean(festivalImage.imageUrl)}`,
   );
   return festivalImage.imageUrl;
 }
@@ -183,7 +183,7 @@ async function resolveCategoryImageUrlById(categoryImageId) {
   }
 
   logger.info(
-    `resolveCategoryImageUrlById | categoryImageId=${categoryImageId} | imageUrl=${categoryImage.imageUrl}`,
+    `resolveCategoryImageUrlById | categoryImageId=${categoryImageId} | imageUrlPresent=${Boolean(categoryImage.imageUrl)}`,
   );
   return categoryImage.imageUrl;
 }
@@ -257,7 +257,7 @@ exports.generateMergedImage = async (
     : await resolveCategoryImageUrlById(categoryImageId);
 
   logger.info(
-    `generateMergedImage | frameType=${frameType} | frameUrl=${frameImageUrl} | backgroundUrl=${backgroundImageUrl}`,
+    `generateMergedImage | frameType=${frameType} | frameResolved=${Boolean(frameImageUrl)} | backgroundResolved=${Boolean(backgroundImageUrl)}`,
   );
 
   // 3. Download both images in parallel
