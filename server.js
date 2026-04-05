@@ -40,6 +40,7 @@ const restrictionRouter = require("./restrictions/src/routes/restriction.routes"
 const contactRouter = require("./contact/src/routes/contact.routes");
 const appContentRouter = require("./appContent/src/routes/appContent.routes");
 const startScreenImageRouter = require("./startScreenImage/src/routes/startScreenImage.routes");
+const fcmRouter = require("./fcm/src/routes/fcm.routes");
 
 const isVercel = process.env.VERCEL === "1";
 const shouldWriteFileLogs =
@@ -196,6 +197,7 @@ app.use("/restrictions", restrictionRouter);
 app.use("/contact-us", contactRouter);
 app.use("/app-content", appContentRouter);
 app.use("/start-screen-images", startScreenImageRouter);
+app.use("/fcm", fcmRouter);
 
 if (!isVercel && require.main === module) {
   app.listen(PORT, () => {
@@ -222,6 +224,7 @@ if (!isVercel && require.main === module) {
     logger.info("[app:backend] Restriction routes        -> /restrictions");
     logger.info("[app:backend] Contact Us routes         -> /contact-us");
     logger.info("[app:backend] App Content routes        -> /app-content");
+    logger.info("[app:backend] FCM routes                -> /fcm");
   });
 }
 
