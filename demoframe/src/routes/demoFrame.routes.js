@@ -21,6 +21,8 @@ router.patch(
 router.patch("/:demoFrameId/name", ctrl.updateDemoFrameName);
 router.patch("/:demoFrameId/status/:status", ctrl.updateStatus);
 router.patch("/:demoFrameId/carousel/:value", ctrl.updateCarousel);
+router.patch("/:demoFrameId/created-by", ctrl.updateCreatedBy);
+router.patch("/:demoFrameId/uploaded-by", ctrl.updateUploadedBy);
 router.patch("/:demoFrameId/soft-delete", ctrl.softDelete);
 router.patch("/:demoFrameId/restore", ctrl.restore);
 

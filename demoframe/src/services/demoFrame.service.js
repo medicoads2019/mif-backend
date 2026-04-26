@@ -320,3 +320,25 @@ exports.hardDelete = async (demoFrameId) => {
     body: { success: true, message: "DemoFrame permanently deleted" },
   };
 };
+
+exports.updateCreatedBy = async (demoFrameId, createdBy) => {
+  const demoFrame = await DemoFrame.findByIdAndUpdate(
+    demoFrameId,
+    { createdBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!demoFrame)
+    return { status: 404, body: { success: false, message: "DemoFrame not found" } };
+  return { status: 200, body: { success: true, message: "DemoFrame createdBy updated", data: demoFrame } };
+};
+
+exports.updateUploadedBy = async (demoFrameId, uploadedBy) => {
+  const demoFrame = await DemoFrame.findByIdAndUpdate(
+    demoFrameId,
+    { uploadedBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!demoFrame)
+    return { status: 404, body: { success: false, message: "DemoFrame not found" } };
+  return { status: 200, body: { success: true, message: "DemoFrame uploadedBy updated", data: demoFrame } };
+};

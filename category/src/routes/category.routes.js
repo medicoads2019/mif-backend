@@ -23,6 +23,8 @@ router.patch("/:categoryId/images/:imageId", ctrl.addImagePatch);
 router.patch("/:categoryId/status/:status", ctrl.updateStatus);
 router.patch("/:categoryId/name", ctrl.updateCategoryName);
 router.patch("/:categoryId/date", ctrl.updateCategoryDate);
+router.patch("/:categoryId/created-by", ctrl.updateCategoryCreatedBy);
+router.patch("/:categoryId/uploaded-by", ctrl.updateCategoryUploadedBy);
 router.patch("/:categoryId/soft-delete", ctrl.softDelete);
 router.patch("/:categoryId/restore", ctrl.restore);
 

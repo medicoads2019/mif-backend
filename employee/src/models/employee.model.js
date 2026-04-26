@@ -67,6 +67,7 @@ const employeeSchema = new mongoose.Schema(
     softDelete: { type: Boolean, default: false },
 
     createdBy: { type: String, default: null },
+    uploadedBy: { type: String, default: null },
     updatedAt: [{ type: Date }],
   },
   {

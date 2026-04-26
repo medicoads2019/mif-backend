@@ -1,8 +1,8 @@
-const service = require("../services/fcm.service");
+const service = require("../services/feedback.service");
 
-exports.registerDeviceToken = async (req, res) => {
+exports.createFeedback = async (req, res) => {
   try {
-    const result = await service.registerDeviceToken(req.body || {});
+    const result = await service.createFeedback(req.body);
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res
@@ -11,9 +11,9 @@ exports.registerDeviceToken = async (req, res) => {
   }
 };
 
-exports.unregisterDeviceToken = async (req, res) => {
+exports.getAllFeedbacks = async (req, res) => {
   try {
-    const result = await service.unregisterDeviceToken(req.body || {});
+    const result = await service.getAllFeedbacks(req.query);
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res
@@ -22,9 +22,9 @@ exports.unregisterDeviceToken = async (req, res) => {
   }
 };
 
-exports.getStats = async (req, res) => {
+exports.getById = async (req, res) => {
   try {
-    const result = await service.getStats();
+    const result = await service.getById(req.params.feedbackId);
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res
@@ -33,9 +33,12 @@ exports.getStats = async (req, res) => {
   }
 };
 
-exports.sendNotification = async (req, res) => {
+exports.updateStatus = async (req, res) => {
   try {
-    const result = await service.sendNotification(req.body || {});
+    const result = await service.updateStatus(
+      req.params.feedbackId,
+      req.body.status,
+    );
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res
@@ -44,14 +47,9 @@ exports.sendNotification = async (req, res) => {
   }
 };
 
-exports.getSentNotifications = async (req, res) => {
+exports.deleteFeedback = async (req, res) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
-    const search = req.query.search || "";
-    const sortField = req.query.sortField || "sentAt";
-    const sortOrder = req.query.sortOrder || "desc";
-    const result = await service.getSentNotifications({ page, limit, search, sortField, sortOrder });
+    const result = await service.deleteFeedback(req.params.feedbackId);
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res
@@ -60,9 +58,9 @@ exports.getSentNotifications = async (req, res) => {
   }
 };
 
-exports.updateSentNotification = async (req, res) => {
+exports.getTrashFeedbacks = async (req, res) => {
   try {
-    const result = await service.updateSentNotification(req.params.id, req.body || {});
+    const result = await service.getTrashFeedbacks();
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res
@@ -71,9 +69,20 @@ exports.updateSentNotification = async (req, res) => {
   }
 };
 
-exports.deleteSentNotification = async (req, res) => {
+exports.restoreFeedback = async (req, res) => {
   try {
-    const result = await service.deleteSentNotification(req.params.id);
+    const result = await service.restoreFeedback(req.params.feedbackId);
+    return res.status(result.status).json(result.body);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.hardDeleteFeedback = async (req, res) => {
+  try {
+    const result = await service.hardDeleteFeedback(req.params.feedbackId);
     return res.status(result.status).json(result.body);
   } catch (error) {
     return res

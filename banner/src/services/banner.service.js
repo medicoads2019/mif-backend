@@ -311,3 +311,25 @@ exports.hardDelete = async (bannerId) => {
     body: { success: true, message: "Banner permanently deleted" },
   };
 };
+
+exports.updateCreatedBy = async (bannerId, createdBy) => {
+  const banner = await Banner.findByIdAndUpdate(
+    bannerId,
+    { createdBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!banner)
+    return { status: 404, body: { success: false, message: "Banner not found" } };
+  return { status: 200, body: { success: true, message: "Banner createdBy updated", data: banner } };
+};
+
+exports.updateUploadedBy = async (bannerId, uploadedBy) => {
+  const banner = await Banner.findByIdAndUpdate(
+    bannerId,
+    { uploadedBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!banner)
+    return { status: 404, body: { success: false, message: "Banner not found" } };
+  return { status: 200, body: { success: true, message: "Banner uploadedBy updated", data: banner } };
+};

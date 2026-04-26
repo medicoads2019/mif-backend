@@ -10,6 +10,9 @@ router.post("/change-password", ctrl.changePassword);
 router.post("/logout", ctrl.logout);
 
 router.get("/all", ctrl.getAllClients);
+router.get("/search", ctrl.searchClients);
+router.get("/stats", ctrl.getClientStats);
+router.get("/verification-stats", ctrl.getVerificationStats);
 router.get("/mobile/:mobileNumber", ctrl.getByMobile);
 router.get("/email", ctrl.getByEmail);
 router.get("/status/:status", ctrl.getByStatus);

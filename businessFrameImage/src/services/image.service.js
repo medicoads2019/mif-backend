@@ -337,3 +337,76 @@ exports.hardDeleteImage = async (id) => {
     body: { success: true, message: "Image permanently deleted" },
   };
 };
+
+exports.bulkSoftDeleteImages = async (ids) => {
+  const results = [];
+  for (const id of ids) {
+    const image = await BusinessFrameImage.findByIdAndUpdate(
+      id,
+      { softDelete: true, status: "DELETED", $push: { updatedAt: new Date() } },
+      { new: true },
+    );
+    if (image) results.push(id);
+  }
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: `${results.length} image(s) soft deleted`,
+      count: results.length,
+    },
+  };
+};
+
+exports.bulkRestoreImages = async (ids) => {
+  const results = [];
+  for (const id of ids) {
+    const image = await BusinessFrameImage.findByIdAndUpdate(
+      id,
+      { softDelete: false, status: "PENDING", $push: { updatedAt: new Date() } },
+      { new: true },
+    );
+    if (image) results.push(id);
+  }
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: `${results.length} image(s) restored`,
+      count: results.length,
+    },
+  };
+};
+
+exports.bulkHardDeleteImages = async (ids) => {
+  processBulkHardDelete(ids).catch((err) =>
+    logger.error(`ASYNC_BULK_HARD_DELETE_FAILED | error=${err.message}`),
+  );
+  return {
+    status: 202,
+    body: {
+      success: true,
+      message: "Bulk hard delete initiated",
+      count: ids.length,
+    },
+  };
+};
+
+async function processBulkHardDelete(ids) {
+  for (const id of ids) {
+    try {
+      const image = await BusinessFrameImage.findById(id);
+      if (!image) continue;
+      if (image.originalPublicId)
+        await cloudinary.uploader.destroy(image.originalPublicId).catch(() => {});
+      if (image.thumbnailPublicId)
+        await cloudinary.uploader.destroy(image.thumbnailPublicId).catch(() => {});
+      await BusinessFrameImage.deleteOne({ _id: id });
+      logger.info(`BULK_HARD_DELETE_SUCCESS | imageId=${maskId(id)}`);
+    } catch (err) {
+      logger.error(
+        `BULK_HARD_DELETE_FAILED | imageId=${maskId(id)} | error=${err.message}`,
+      );
+    }
+  }
+}

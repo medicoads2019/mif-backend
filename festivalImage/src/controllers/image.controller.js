@@ -309,3 +309,45 @@ exports.hardDeleteImage = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+exports.bulkSoftDeleteImages = async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ success: false, message: "ids array is required" });
+  }
+  try {
+    const result = await service.bulkSoftDeleteImages(ids);
+    return res.status(result.status).json(result.body);
+  } catch (error) {
+    logger.error(`CONTROLLER_ERROR | endpoint=bulkSoftDeleteImages | ${error.message}`);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.bulkRestoreImages = async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ success: false, message: "ids array is required" });
+  }
+  try {
+    const result = await service.bulkRestoreImages(ids);
+    return res.status(result.status).json(result.body);
+  } catch (error) {
+    logger.error(`CONTROLLER_ERROR | endpoint=bulkRestoreImages | ${error.message}`);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.bulkHardDeleteImages = async (req, res) => {
+  const { ids } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ success: false, message: "ids array is required" });
+  }
+  try {
+    const result = await service.bulkHardDeleteImages(ids);
+    return res.status(result.status).json(result.body);
+  } catch (error) {
+    logger.error(`CONTROLLER_ERROR | endpoint=bulkHardDeleteImages | ${error.message}`);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

@@ -17,6 +17,8 @@ router.patch("/:bannerId/image", ctrl.uploadSingle, ctrl.updateBannerImage);
 router.patch("/:bannerId/name", ctrl.updateBannerName);
 router.patch("/:bannerId/status/:status", ctrl.updateStatus);
 router.patch("/:bannerId/carousel/:value", ctrl.updateCarousel);
+router.patch("/:bannerId/created-by", ctrl.updateCreatedBy);
+router.patch("/:bannerId/uploaded-by", ctrl.updateUploadedBy);
 router.patch("/:bannerId/soft-delete", ctrl.softDelete);
 router.patch("/:bannerId/restore", ctrl.restore);
 

@@ -573,6 +573,54 @@ async function updateFestivalDate(festivalId, festivalDate) {
   };
 }
 
+// ─── UPDATE CREATED BY ───────────────────────────────────────────────────────
+
+async function updateCreatedBy(festivalId, createdBy) {
+  const existing = await Festival.findOne({
+    _id: festivalId,
+    softDelete: { $ne: true },
+  });
+  if (!existing) {
+    return {
+      status: 404,
+      body: { success: false, message: "Festival not found or soft deleted" },
+    };
+  }
+  if (existing.createdBy === createdBy) {
+    return { status: 200, body: { success: true, message: "No changes detected" } };
+  }
+  existing.createdBy = createdBy;
+  await existing.save();
+  return {
+    status: 200,
+    body: { success: true, message: "CreatedBy updated successfully", data: mapToResponse(existing) },
+  };
+}
+
+// ─── UPDATE UPLOADED BY ───────────────────────────────────────────────────────
+
+async function updateUploadedBy(festivalId, uploadedBy) {
+  const existing = await Festival.findOne({
+    _id: festivalId,
+    softDelete: { $ne: true },
+  });
+  if (!existing) {
+    return {
+      status: 404,
+      body: { success: false, message: "Festival not found or soft deleted" },
+    };
+  }
+  if (existing.uploadedBy === uploadedBy) {
+    return { status: 200, body: { success: true, message: "No changes detected" } };
+  }
+  existing.uploadedBy = uploadedBy;
+  await existing.save();
+  return {
+    status: 200,
+    body: { success: true, message: "UploadedBy updated successfully", data: mapToResponse(existing) },
+  };
+}
+
 // ─── SOFT DELETE ──────────────────────────────────────────────────────────────
 
 async function softDelete(festivalId) {
@@ -795,6 +843,8 @@ module.exports = {
   updateStatus,
   updateFestivalName,
   updateFestivalDate,
+  updateCreatedBy,
+  updateUploadedBy,
   softDelete,
   restore,
   removeImageFromFestival,

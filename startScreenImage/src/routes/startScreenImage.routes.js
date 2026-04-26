@@ -16,6 +16,7 @@ router.patch("/:id/status/:status", ctrl.updateStatus);
 router.patch("/:id/show-in-start-screen/:value", ctrl.updateShowInStartScreen);
 router.patch("/:id/soft-delete", ctrl.softDelete);
 router.patch("/:id/restore", ctrl.restore);
+router.patch("/:id/created-by", ctrl.updateCreatedBy);
 
 router.delete("/:id/hard-delete", ctrl.hardDelete);
 

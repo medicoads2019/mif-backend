@@ -377,3 +377,49 @@ exports.reorderCategorys = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+exports.updateCategoryCreatedBy = async (req, res) => {
+  const { categoryId } = req.params;
+  const { createdBy } = req.query;
+  if (!createdBy || !createdBy.trim())
+    return res
+      .status(400)
+      .json({ success: false, message: "createdBy is required" });
+  try {
+    const result = await service.updateCategoryCreatedBy(
+      categoryId,
+      createdBy.trim(),
+    );
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    logger.error(
+      `CONTROLLER_ERROR | endpoint=updateCategoryCreatedBy | ${err.message}`,
+    );
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.updateCategoryUploadedBy = async (req, res) => {
+  const { categoryId } = req.params;
+  const { uploadedBy } = req.query;
+  if (!uploadedBy || !uploadedBy.trim())
+    return res
+      .status(400)
+      .json({ success: false, message: "uploadedBy is required" });
+  try {
+    const result = await service.updateCategoryUploadedBy(
+      categoryId,
+      uploadedBy.trim(),
+    );
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    logger.error(
+      `CONTROLLER_ERROR | endpoint=updateCategoryUploadedBy | ${err.message}`,
+    );
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};

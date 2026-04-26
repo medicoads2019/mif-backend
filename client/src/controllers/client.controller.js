@@ -36,9 +36,50 @@ exports.createClient = async (req, res) => {
   }
 };
 
+exports.getClientStats = async (req, res) => {
+  try {
+    const { createdBy } = req.query;
+    const result = await service.getClientStats(createdBy);
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.getVerificationStats = async (req, res) => {
+  try {
+    const result = await service.getVerificationStats();
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
 exports.getAllClients = async (req, res) => {
   try {
-    const result = await service.getAllClients();
+    const { page = 1, limit = 100 } = req.query;
+    const result = await service.getAllClients(page, limit);
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.searchClients = async (req, res) => {
+  const { type, q } = req.query;
+  if (!type || !q) {
+    return res
+      .status(400)
+      .json({ success: false, message: "type and q query params are required" });
+  }
+  try {
+    const result = await service.searchClients(type, q);
     return res.status(result.status).json(result.body);
   } catch (err) {
     return res
@@ -163,6 +204,10 @@ exports.updatePersonalInfo = async (req, res) => {
     "gender",
     "alternateMobileNumber",
     "socialMediaLinks",
+    "createdBy",
+    "uploadedBy",
+    "mobileOtpVerified",
+    "emailOtpVerified",
   ];
   const data = {};
   for (const key of allowed) {

@@ -16,6 +16,10 @@ router.get("/orientation/:orientation", ctrl.getByOrientation);
 router.get("/client-frame/:clientFrameId", ctrl.getByClientFrameId);
 router.get("/:id", ctrl.getById);
 
+router.patch("/bulk-soft-delete", ctrl.bulkSoftDeleteImages);
+router.patch("/bulk-restore", ctrl.bulkRestoreImages);
+router.post("/bulk-hard-delete", ctrl.bulkHardDeleteImages);
+
 router.patch("/reorder", ctrl.reorderImages);
 router.patch("/:id/user-access/:userTypeAccess", ctrl.updateUserTypeAccess);
 router.patch("/:id/status/:status", ctrl.updateStatus);

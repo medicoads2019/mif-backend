@@ -85,6 +85,7 @@ const clientSchema = new mongoose.Schema(
     lastActiveDate: { type: Date, default: null },
     softDelete: { type: Boolean, default: false },
     createdBy: { type: String, default: null },
+    uploadedBy: { type: String, default: null },
     updatedAt: [{ type: Date }],
   },
   {

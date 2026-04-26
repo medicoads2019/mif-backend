@@ -263,3 +263,14 @@ exports.hardDelete = async (id) => {
     body: { success: true, message: "Start screen image permanently deleted" },
   };
 };
+
+exports.updateCreatedBy = async (id, createdBy) => {
+  const doc = await StartScreenImage.findByIdAndUpdate(
+    id,
+    { createdBy },
+    { new: true },
+  );
+  if (!doc)
+    return { status: 404, body: { success: false, message: "Start screen image not found" } };
+  return { status: 200, body: { success: true, message: "createdBy updated", data: doc } };
+};

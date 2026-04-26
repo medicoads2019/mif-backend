@@ -354,3 +354,25 @@ exports.hardDelete = async (clientFrameId) => {
     body: { success: true, message: "ClientFrame permanently deleted" },
   };
 };
+
+exports.updateCreatedBy = async (clientFrameId, createdBy) => {
+  const cf = await ClientFrame.findByIdAndUpdate(
+    clientFrameId,
+    { createdBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!cf)
+    return { status: 404, body: { success: false, message: "ClientFrame not found" } };
+  return { status: 200, body: { success: true, message: "ClientFrame createdBy updated", data: cf } };
+};
+
+exports.updateUploadedBy = async (clientFrameId, uploadedBy) => {
+  const cf = await ClientFrame.findByIdAndUpdate(
+    clientFrameId,
+    { uploadedBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!cf)
+    return { status: 404, body: { success: false, message: "ClientFrame not found" } };
+  return { status: 200, body: { success: true, message: "ClientFrame uploadedBy updated", data: cf } };
+};

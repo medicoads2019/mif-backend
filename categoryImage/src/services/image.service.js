@@ -405,6 +405,124 @@ async function hardDeleteImage(id) {
   };
 }
 
+async function performImageHardDelete(entity) {
+  const id = entity._id.toString();
+  if (entity.originalPublicId)
+    await cloudinary.uploader.destroy(entity.originalPublicId).catch(() => {});
+  if (entity.thumbnailPublicId)
+    await cloudinary.uploader
+      .destroy(entity.thumbnailPublicId)
+      .catch(() => {});
+  await Image.deleteOne({ _id: id });
+  try {
+    await axios.delete(
+      `${CATEGORY_SERVICE_URL}/categorys/${entity.categoryId}/images/${id}`,
+    );
+  } catch (ex) {
+    logger.warn(
+      `EXTERNAL_CALL_FAILED | service=CategoryService | imageId=${maskId(id)} | error=${ex.message}`,
+    );
+  }
+}
+
+async function bulkSoftDeleteImages(ids) {
+  const results = { success: [], failed: [] };
+  for (const id of ids) {
+    try {
+      const updated = await Image.findOneAndUpdate(
+        { _id: id, softDelete: { $ne: true } },
+        { softDelete: true, status: "DELETED" },
+        { new: true },
+      );
+      if (!updated) {
+        results.failed.push({ id, reason: "Not found or already deleted" });
+      } else {
+        results.success.push(id);
+      }
+    } catch (error) {
+      results.failed.push({ id, reason: error.message });
+    }
+  }
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: "Bulk soft delete completed",
+      successCount: results.success.length,
+      failedCount: results.failed.length,
+      failed: results.failed,
+    },
+  };
+}
+
+async function bulkRestoreImages(ids) {
+  const results = { success: [], failed: [] };
+  for (const id of ids) {
+    try {
+      const updated = await Image.findOneAndUpdate(
+        { _id: id, softDelete: true },
+        { softDelete: false, status: "PENDING" },
+        { new: true },
+      );
+      if (!updated) {
+        results.failed.push({ id, reason: "Not found or not deleted" });
+      } else {
+        results.success.push(id);
+      }
+    } catch (error) {
+      results.failed.push({ id, reason: error.message });
+    }
+  }
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: "Bulk restore completed",
+      successCount: results.success.length,
+      failedCount: results.failed.length,
+      failed: results.failed,
+    },
+  };
+}
+
+async function bulkHardDeleteImages(ids) {
+  const results = { success: [], failed: [] };
+  for (const id of ids) {
+    try {
+      const entity = await Image.findById(id);
+      if (!entity) {
+        results.failed.push({ id, reason: "Not found" });
+        continue;
+      }
+      if (!entity.softDelete) {
+        results.failed.push({
+          id,
+          reason: "Only soft deleted images can be permanently deleted",
+        });
+        continue;
+      }
+      performImageHardDelete(entity).catch((error) => {
+        logger.error(
+          `ASYNC_BULK_DELETE_FAILED | imageId=${maskId(id)} | error=${error.message}`,
+        );
+      });
+      results.success.push(id);
+    } catch (error) {
+      results.failed.push({ id, reason: error.message });
+    }
+  }
+  return {
+    status: 202,
+    body: {
+      success: true,
+      message: "Bulk hard delete initiated",
+      successCount: results.success.length,
+      failedCount: results.failed.length,
+      failed: results.failed,
+    },
+  };
+}
+
 async function batchDeleteByCategoryId(categoryId) {
   const start = Date.now();
   logger.info(
@@ -464,6 +582,9 @@ async function processBatchDeleteByCategoryId(images, categoryId) {
 module.exports = {
   batchDeleteByCategoryId,
   batchUpload,
+  bulkSoftDeleteImages,
+  bulkRestoreImages,
+  bulkHardDeleteImages,
   getById,
   getByStatus,
   getBySoftDelete,

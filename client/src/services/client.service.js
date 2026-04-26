@@ -520,8 +520,114 @@ exports.logout = async ({ token }) => {
   }
 };
 
-exports.getAllClients = async () => {
-  const clients = await Client.find({ softDelete: false }).select(
+exports.getClientStats = async (createdBy) => {
+  const baseFilter = { softDelete: false };
+  if (createdBy && createdBy.trim()) {
+    baseFilter.createdBy = new RegExp(createdBy.trim(), "i");
+  }
+  const [total, byUserType, byStatus] = await Promise.all([
+    Client.countDocuments(baseFilter),
+    Client.aggregate([
+      { $match: baseFilter },
+      { $group: { _id: "$userType", count: { $sum: 1 } } },
+    ]),
+    Client.aggregate([
+      { $match: baseFilter },
+      { $group: { _id: "$clientStatus", count: { $sum: 1 } } },
+    ]),
+  ]);
+  const byUserTypeMap = {};
+  byUserType.forEach(({ _id, count }) => { if (_id) byUserTypeMap[_id] = count; });
+  const byStatusMap = {};
+  byStatus.forEach(({ _id, count }) => { if (_id) byStatusMap[_id] = count; });
+  return {
+    status: 200,
+    body: { success: true, data: { total, byUserType: byUserTypeMap, byStatus: byStatusMap } },
+  };
+};
+
+exports.getVerificationStats = async () => {
+  const [total, mobileVerified, emailVerified] = await Promise.all([
+    Client.countDocuments({ softDelete: false }),
+    Client.countDocuments({ softDelete: false, mobileOtpVerified: true }),
+    Client.countDocuments({ softDelete: false, emailOtpVerified: true }),
+  ]);
+  return {
+    status: 200,
+    body: {
+      success: true,
+      data: {
+        total,
+        mobileVerified,
+        mobileNotVerified: total - mobileVerified,
+        emailVerified,
+        emailNotVerified: total - emailVerified,
+      },
+    },
+  };
+};
+
+exports.getAllClients = async (page = 1, limit = 100) => {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(500, Math.max(1, parseInt(limit, 10) || 100));
+  const skip = (pageNum - 1) * limitNum;
+  const [clients, total] = await Promise.all([
+    Client.find({ softDelete: false })
+      .select("-password -emailVerificationCode")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum),
+    Client.countDocuments({ softDelete: false }),
+  ]);
+  return {
+    status: 200,
+    body: {
+      success: true,
+      data: clients,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    },
+  };
+};
+
+exports.searchClients = async (type, query) => {
+  if (!query || !query.trim()) {
+    return {
+      status: 400,
+      body: { success: false, message: "Search query is required" },
+    };
+  }
+  const q = query.trim();
+  let filter = { softDelete: false };
+
+  if (type === "name") {
+    const regex = new RegExp(q, "i");
+    filter.$or = [{ firstName: regex }, { middleName: regex }, { lastName: regex }];
+  } else if (type === "clientId") {
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(q)) {
+      return {
+        status: 400,
+        body: { success: false, message: "Invalid clientId format" },
+      };
+    }
+    filter._id = q;
+  } else if (type === "myReferralCode") {
+    filter.myReferralCode = q.toUpperCase();
+  } else if (type === "createdBy") {
+    filter.createdBy = new RegExp(q, "i");
+  } else {
+    return {
+      status: 400,
+      body: { success: false, message: "Invalid search type. Use name, clientId, myReferralCode, or createdBy" },
+    };
+  }
+
+  const clients = await Client.find(filter).select(
     "-password -emailVerificationCode",
   );
   return { status: 200, body: { success: true, data: clients } };

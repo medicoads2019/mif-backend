@@ -425,6 +425,40 @@ exports.updateFestivalDate = async (req, res) => {
   }
 };
 
+// PATCH /festivals/:festivalId/created-by?createdBy=
+exports.updateCreatedBy = async (req, res) => {
+  const { festivalId } = req.params;
+  const { createdBy } = req.query;
+  if (!festivalId || !festivalId.trim())
+    return res.status(400).json({ success: false, message: "FestivalId is required" });
+  if (!createdBy || !createdBy.trim())
+    return res.status(400).json({ success: false, message: "createdBy is required" });
+  try {
+    const result = await service.updateCreatedBy(festivalId, createdBy.trim());
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    logger.error(`CONTROLLER_ERROR | endpoint=updateCreatedBy | ${err.message}`);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// PATCH /festivals/:festivalId/uploaded-by?uploadedBy=
+exports.updateUploadedBy = async (req, res) => {
+  const { festivalId } = req.params;
+  const { uploadedBy } = req.query;
+  if (!festivalId || !festivalId.trim())
+    return res.status(400).json({ success: false, message: "FestivalId is required" });
+  if (!uploadedBy || !uploadedBy.trim())
+    return res.status(400).json({ success: false, message: "uploadedBy is required" });
+  try {
+    const result = await service.updateUploadedBy(festivalId, uploadedBy.trim());
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    logger.error(`CONTROLLER_ERROR | endpoint=updateUploadedBy | ${err.message}`);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 // PATCH /festivals/:festivalId/soft-delete
 exports.softDelete = async (req, res) => {
   const { festivalId } = req.params;

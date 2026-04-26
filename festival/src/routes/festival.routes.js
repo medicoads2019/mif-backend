@@ -26,6 +26,8 @@ router.patch("/:festivalId/images/:imageId", ctrl.addImagePatch);
 router.patch("/:festivalId/status/:status", ctrl.updateStatus);
 router.patch("/:festivalId/name", ctrl.updateFestivalName);
 router.patch("/:festivalId/date", ctrl.updateFestivalDate);
+router.patch("/:festivalId/created-by", ctrl.updateCreatedBy);
+router.patch("/:festivalId/uploaded-by", ctrl.updateUploadedBy);
 router.patch("/:festivalId/soft-delete", ctrl.softDelete);
 router.patch("/:festivalId/restore", ctrl.restore);
 

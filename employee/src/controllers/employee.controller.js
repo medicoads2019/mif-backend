@@ -47,7 +47,25 @@ exports.createEmployee = async (req, res) => {
 
 exports.getAllEmployees = async (req, res) => {
   try {
-    const result = await service.getAllEmployees();
+    const { page = 1, limit = 100 } = req.query;
+    const result = await service.getAllEmployees(page, limit);
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.searchEmployees = async (req, res) => {
+  const { type, q } = req.query;
+  if (!type || !q) {
+    return res
+      .status(400)
+      .json({ success: false, message: "type and q query params are required" });
+  }
+  try {
+    const result = await service.searchEmployees(type, q);
     return res.status(result.status).json(result.body);
   } catch (err) {
     return res
@@ -171,6 +189,8 @@ exports.updatePersonalInfo = async (req, res) => {
     "dateOfBirth",
     "gender",
     "alternateMobileNumber",
+    "createdBy",
+    "uploadedBy",
   ];
   const data = {};
   for (const key of allowed) {

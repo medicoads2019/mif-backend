@@ -20,6 +20,8 @@ router.patch(
 router.patch("/:businessFrameId/name", ctrl.updateBusinessFrameName);
 router.patch("/:businessFrameId/code", ctrl.updateBusinessFrameCode);
 router.patch("/:businessFrameId/status/:status", ctrl.updateStatus);
+router.patch("/:businessFrameId/created-by", ctrl.updateCreatedBy);
+router.patch("/:businessFrameId/uploaded-by", ctrl.updateUploadedBy);
 router.patch("/:businessFrameId/soft-delete", ctrl.softDelete);
 router.patch("/:businessFrameId/restore", ctrl.restore);
 

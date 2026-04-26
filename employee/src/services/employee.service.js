@@ -482,10 +482,54 @@ exports.logout = async ({ token }) => {
   }
 };
 
-exports.getAllEmployees = async () => {
-  const employees = await Employee.find({ softDelete: false }).select(
-    "-password -emailVerificationCode",
-  );
+exports.getAllEmployees = async (page = 1, limit = 100) => {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(500, Math.max(1, parseInt(limit, 10) || 100));
+  const skip = (pageNum - 1) * limitNum;
+  const [employees, total] = await Promise.all([
+    Employee.find({ softDelete: false })
+      .select("-password -emailVerificationCode")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum),
+    Employee.countDocuments({ softDelete: false }),
+  ]);
+  return {
+    status: 200,
+    body: {
+      success: true,
+      data: employees,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    },
+  };
+};
+
+exports.searchEmployees = async (type, query) => {
+  if (!query || !query.trim()) {
+    return { status: 400, body: { success: false, message: "Search query is required" } };
+  }
+  const q = query.trim();
+  let filter = { softDelete: false };
+  if (type === "name") {
+    const regex = new RegExp(q, "i");
+    filter.$or = [{ firstName: regex }, { middleName: regex }, { lastName: regex }];
+  } else if (type === "employeeId") {
+    const mongoose = require("mongoose");
+    if (!mongoose.Types.ObjectId.isValid(q)) {
+      return { status: 400, body: { success: false, message: "Invalid employeeId format" } };
+    }
+    filter._id = q;
+  } else if (type === "myReferralCode") {
+    filter.myReferralCode = q.toUpperCase();
+  } else {
+    return { status: 400, body: { success: false, message: "Invalid search type" } };
+  }
+  const employees = await Employee.find(filter).select("-password -emailVerificationCode");
   return { status: 200, body: { success: true, data: employees } };
 };
 

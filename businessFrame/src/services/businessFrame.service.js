@@ -400,3 +400,25 @@ exports.hardDelete = async (businessFrameId) => {
     body: { success: true, message: "BusinessFrame permanently deleted" },
   };
 };
+
+exports.updateCreatedBy = async (businessFrameId, createdBy) => {
+  const bf = await BusinessFrame.findByIdAndUpdate(
+    businessFrameId,
+    { createdBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!bf)
+    return { status: 404, body: { success: false, message: "BusinessFrame not found" } };
+  return { status: 200, body: { success: true, message: "BusinessFrame createdBy updated", data: bf } };
+};
+
+exports.updateUploadedBy = async (businessFrameId, uploadedBy) => {
+  const bf = await BusinessFrame.findByIdAndUpdate(
+    businessFrameId,
+    { uploadedBy, $push: { updatedAt: new Date() } },
+    { new: true },
+  );
+  if (!bf)
+    return { status: 404, body: { success: false, message: "BusinessFrame not found" } };
+  return { status: 200, body: { success: true, message: "BusinessFrame uploadedBy updated", data: bf } };
+};

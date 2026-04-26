@@ -25,6 +25,9 @@ router.patch(
 router.patch("/:id/status/:status", controller.updateStatus);
 router.patch("/:id/soft-delete", controller.softDeleteImage);
 router.patch("/:id/restore", controller.restoreImage);
+router.patch("/bulk-soft-delete", controller.bulkSoftDeleteImages);
+router.patch("/bulk-restore", controller.bulkRestoreImages);
+router.post("/bulk-hard-delete", controller.bulkHardDeleteImages);
 
 router.delete("/:id", controller.hardDeleteImage);
 

@@ -1,4 +1,5 @@
 const FcmDeviceToken = require("../models/fcmDeviceToken.model");
+const FcmSentNotification = require("../models/fcmSentNotification.model");
 const { getMessaging } = require("../config/firebaseAdmin");
 const logger = require("../utils/logger");
 
@@ -251,10 +252,114 @@ exports.sendNotification = async ({ title, body, data, clientIds, tokens }) => {
     };
   }
 
-  return sendMulticast({
+  const result = await sendMulticast({
     tokens: targetTokens,
     title: normalizedTitle,
     body: normalizedBody,
     data: sanitizeDataMap(data),
   });
+
+  if (result.status === 200) {
+    try {
+      await FcmSentNotification.create({
+        title: normalizedTitle,
+        body: normalizedBody,
+        clientIds: requestedClientIds,
+        data: sanitizeDataMap(data),
+        successCount: result.body?.data?.successCount ?? 0,
+        failureCount: result.body?.data?.failureCount ?? 0,
+        sentAt: new Date(),
+      });
+    } catch (err) {
+      logger.error("FCM_SAVE_SENT | Failed to persist sent notification:", err);
+    }
+  }
+
+  return result;
+};
+
+const ALLOWED_SORT_FIELDS = new Set(["title", "body", "successCount", "failureCount", "sentAt", "createdAt"]);
+
+exports.getSentNotifications = async ({ page = 1, limit = 20, search = "", sortField = "sentAt", sortOrder = "desc" } = {}) => {
+  const skip = (page - 1) * limit;
+
+  const query = {};
+  const trimmedSearch = normalizeString(search);
+  if (trimmedSearch) {
+    query.$or = [
+      { title: { $regex: trimmedSearch, $options: "i" } },
+      { body: { $regex: trimmedSearch, $options: "i" } },
+    ];
+  }
+
+  const safeSortField = ALLOWED_SORT_FIELDS.has(sortField) ? sortField : "sentAt";
+  const safeSortOrder = sortOrder === "asc" ? 1 : -1;
+
+  const [records, total] = await Promise.all([
+    FcmSentNotification.find(query)
+      .sort({ [safeSortField]: safeSortOrder })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    FcmSentNotification.countDocuments(query),
+  ]);
+
+  return {
+    status: 200,
+    body: {
+      success: true,
+      data: {
+        records,
+        total,
+        page,
+        limit,
+      },
+    },
+  };
+};
+
+exports.updateSentNotification = async (id, { title, body, clientIds, data }) => {
+  if (!id) {
+    return { status: 400, body: { success: false, message: "id is required" } };
+  }
+
+  const normalizedTitle = normalizeString(title);
+  const normalizedBody = normalizeString(body);
+
+  if (!normalizedTitle || !normalizedBody) {
+    return { status: 400, body: { success: false, message: "title and body are required" } };
+  }
+
+  const record = await FcmSentNotification.findByIdAndUpdate(
+    id,
+    {
+      title: normalizedTitle,
+      body: normalizedBody,
+      clientIds: Array.isArray(clientIds)
+        ? clientIds.map((c) => normalizeString(c)).filter(Boolean)
+        : [],
+      data: sanitizeDataMap(data),
+    },
+    { new: true },
+  );
+
+  if (!record) {
+    return { status: 404, body: { success: false, message: "Notification not found" } };
+  }
+
+  return { status: 200, body: { success: true, data: record } };
+};
+
+exports.deleteSentNotification = async (id) => {
+  if (!id) {
+    return { status: 400, body: { success: false, message: "id is required" } };
+  }
+
+  const result = await FcmSentNotification.findByIdAndDelete(id);
+
+  if (!result) {
+    return { status: 404, body: { success: false, message: "Notification not found" } };
+  }
+
+  return { status: 200, body: { success: true, message: "Notification deleted" } };
 };

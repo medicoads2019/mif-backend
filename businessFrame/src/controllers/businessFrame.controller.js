@@ -256,3 +256,27 @@ exports.hardDelete = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+exports.updateCreatedBy = async (req, res) => {
+  const createdBy = req.query.createdBy || req.body.createdBy;
+  if (!createdBy)
+    return res.status(400).json({ success: false, message: "createdBy is required" });
+  try {
+    const result = await service.updateCreatedBy(req.params.businessFrameId, createdBy);
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.updateUploadedBy = async (req, res) => {
+  const uploadedBy = req.query.uploadedBy || req.body.uploadedBy;
+  if (!uploadedBy)
+    return res.status(400).json({ success: false, message: "uploadedBy is required" });
+  try {
+    const result = await service.updateUploadedBy(req.params.businessFrameId, uploadedBy);
+    return res.status(result.status).json(result.body);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

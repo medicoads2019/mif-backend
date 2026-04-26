@@ -14,6 +14,9 @@ router.get("/category/:categoryId", ctrl.getByCategoryId);
 router.get("/:id", ctrl.getById);
 
 router.patch("/reorder", ctrl.reorderImages);
+router.patch("/bulk-soft-delete", ctrl.bulkSoftDeleteImages);
+router.patch("/bulk-restore", ctrl.bulkRestoreImages);
+router.post("/bulk-hard-delete", ctrl.bulkHardDeleteImages);
 router.patch("/:id/increment-view", ctrl.incrementView);
 router.patch("/:id/increment-like", ctrl.incrementLike);
 router.patch("/:id/increment-download", ctrl.incrementDownload);

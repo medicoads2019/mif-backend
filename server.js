@@ -1,5 +1,20 @@
 "use strict";
 
+// Force Node's c-ares DNS resolver to use reliable public nameservers.
+// On Windows, c-ares can pick up legacy fec0:0:0:ffff::1 loopback placeholders
+// from unused adapters and translate them to 127.0.0.1 — causing ECONNREFUSED
+// on every SRV lookup (e.g. mongodb+srv://). This runs before any network call.
+const dns = require("dns");
+(function patchDnsServers() {
+  const LOOPBACK_PREFIXES = ["127.", "0.0.0.0", "fec0:", "::1"];
+  const isLoopback = (s) => LOOPBACK_PREFIXES.some((p) => s.startsWith(p));
+  const current = dns.getServers();
+  const usable = current.filter((s) => !isLoopback(s));
+  if (usable.length < current.length) {
+    dns.setServers([...usable, "8.8.8.8", "1.1.1.1"].slice(0, 4));
+  }
+})();
+
 const dotenv = require("dotenv");
 const path = require("path");
 
@@ -38,9 +53,11 @@ const employeeRouter = require("./employee/src/routes/employee.routes");
 const imageDownloadRouter = require("./imageDownload/src/routes/imageDownload.routes");
 const restrictionRouter = require("./restrictions/src/routes/restriction.routes");
 const contactRouter = require("./contact/src/routes/contact.routes");
+const feedbackRouter = require("./feedback/src/routes/feedback.routes");
 const appContentRouter = require("./appContent/src/routes/appContent.routes");
 const startScreenImageRouter = require("./startScreenImage/src/routes/startScreenImage.routes");
 const fcmRouter = require("./fcm/src/routes/fcm.routes");
+const appSettingsRouter = require("./appSettings/src/routes/appSettings.routes");
 
 const isVercel = process.env.VERCEL === "1";
 const shouldWriteFileLogs =
@@ -195,9 +212,11 @@ app.use("/employees", employeeRouter);
 app.use("/image-download", imageDownloadRouter);
 app.use("/restrictions", restrictionRouter);
 app.use("/contact-us", contactRouter);
+app.use("/feedback", feedbackRouter);
 app.use("/app-content", appContentRouter);
 app.use("/start-screen-images", startScreenImageRouter);
 app.use("/fcm", fcmRouter);
+app.use("/app-settings", appSettingsRouter);
 
 if (!isVercel && require.main === module) {
   app.listen(PORT, () => {

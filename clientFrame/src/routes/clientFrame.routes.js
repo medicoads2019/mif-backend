@@ -19,6 +19,8 @@ router.patch(
 );
 router.patch("/:clientFrameId/name", ctrl.updateClientFrameName);
 router.patch("/:clientFrameId/status/:status", ctrl.updateStatus);
+router.patch("/:clientFrameId/created-by", ctrl.updateCreatedBy);
+router.patch("/:clientFrameId/uploaded-by", ctrl.updateUploadedBy);
 router.patch("/:clientFrameId/soft-delete", ctrl.softDelete);
 router.patch("/:clientFrameId/restore", ctrl.restore);
 

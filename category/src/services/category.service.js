@@ -644,6 +644,52 @@ async function reorderCategorys(items) {
   };
 }
 
+async function updateCategoryCreatedBy(categoryId, createdBy) {
+  const category = await Category.findOne({
+    _id: categoryId,
+    softDelete: { $ne: true },
+  });
+  if (!category) {
+    return {
+      status: 404,
+      body: { success: false, message: "Category not found or soft deleted" },
+    };
+  }
+  category.createdBy = createdBy;
+  await category.save();
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: "Category createdBy updated",
+      data: mapToResponse(category),
+    },
+  };
+}
+
+async function updateCategoryUploadedBy(categoryId, uploadedBy) {
+  const category = await Category.findOne({
+    _id: categoryId,
+    softDelete: { $ne: true },
+  });
+  if (!category) {
+    return {
+      status: 404,
+      body: { success: false, message: "Category not found or soft deleted" },
+    };
+  }
+  category.uploadedBy = uploadedBy;
+  await category.save();
+  return {
+    status: 200,
+    body: {
+      success: true,
+      message: "Category uploadedBy updated",
+      data: mapToResponse(category),
+    },
+  };
+}
+
 module.exports = {
   parseDdMmYyyy,
   createCategory,
@@ -658,6 +704,8 @@ module.exports = {
   updateStatus,
   updateCategoryName,
   updateCategoryDate,
+  updateCategoryCreatedBy,
+  updateCategoryUploadedBy,
   addImagePatch,
   removeImageFromCategory,
   softDelete,
